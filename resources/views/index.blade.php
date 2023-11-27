@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <title>Title</title>
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/index.css">
+    <link rel="stylesheet" href="{{asset('styles/main.css')}}">
+    <link rel="stylesheet" href="{{asset('styles/index.css')}}">
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-    <script src="js/jquery-3.7.1.min.js"></script>
+    <script src="{{asset('js/jquery-3.7.1.min.js')}}"></script>
 </head>
 <body>
 <div data-v-5a5f7285="" data-v-0fcbf881="" class="header-subscriptions">
@@ -229,37 +229,44 @@
             <div class="statistics__inputs__input_container">
                 <label for="position_select">Position</label>
                 <select name="position" id="position_select">
+                    @foreach($positions as $position)
+                        <option @if($position === $selected_position) selected @endif>{{$position}}</option>
+                    @endforeach
                 </select>
             </div>
             <div class="statistics__inputs__input_container">
-                <label for="position_select">Position</label>
+                <label for="technology_select">Technology</label>
                 <select name="technology" id="technology_select">
+                    <option value="">All</option>
+                    @foreach($technologies as $technology)
+                        <option @if(isset($selected_technology) && $technology === $selected_technology) selected @endif>{{$technology}}</option>
+                    @endforeach
                 </select>
             </div>
             <div class="statistics__inputs__input_container">
                 <label for="city_select">Region</label>
                 <select name="location" id="city_select">
-                    <option value="Jerusalem">Jerusalem</option>
-                    <option value="North">North</option>
-                    <option value="South">South</option>
-                    <option value="Center">Center</option>
+                    <option selected value="">All</option>
+                    @foreach($location_options as $idx => $location_name)
+                        <option @if(isset($selected_location) && $selected_location === $location_name) selected @endif value="{{$idx}}">{{$location_name}}</option>
+                    @endforeach
                 </select>
             </div>
             <div class="statistics__inputs__input_container">
                 <label for="seniority_select">Seniority</label>
                 <select name="seniority" id="seniority_select">
-                    <option value="Entry Level">Entry Level</option>
-                    <option value="Junior">Junior</option>
-                    <option value="Middle Level">Middle Level</option>
-                    <option value="Senior">Senior</option>
-                    <option value="Team-Leader/Managment">Team-Leader/Managment</option>
+                    <option selected value="">All</option>
+                    @foreach($seniority_options as $idx => $seniority)
+                        <option @if(isset($selected_seniority) && $selected_seniority === $seniority) selected @endif value="{{$idx}}">{{$seniority}}</option>
+                    @endforeach
                 </select>
             </div>
             <div class="statistics__inputs__input_container">
                 <label for="experience_select">Experience</label>
                 <select name="experience" id="experience_select">
+                    <option value="" selected>All</option>
                     @foreach($exp_options as $idx => $option_name)
-                        <option value="{{$idx}}">{{$option_name}}</option>
+                        <option @if(isset($selected_experience) && $selected_experience == $idx) selected @endif value="{{$idx}}">{{$option_name}}</option>
                     @endforeach
                 </select>
             </div>
@@ -311,7 +318,6 @@
     const tooltipPadding = 5;
 
     document.addEventListener('DOMContentLoaded', function () {
-        initOptions();
         document.querySelectorAll('#db-employment .item').forEach((el) => {
             el.addEventListener('click',  function (ev){
                 document.querySelector('#db-employment .item.active').classList.remove('active');
@@ -327,11 +333,32 @@
         });
         document.querySelectorAll('.statistics__inputs__input_container select').forEach(
             (el) => {
-                el.addEventListener('change', function (el) {
-                    fetchData();
+                el.addEventListener('change', function (ev) {
+                    let new_url = '/salaries/' + document.getElementById("position_select").value;
+                    let technology = document.getElementById("technology_select").value;
+                    if(technology !== '' && ev.currentTarget.id !== 'position_select') {
+                        new_url += ('/' + technology);
+                    }
+                    let position_select = ['position_select', 'technology_select'];
+                    let selects = document.querySelectorAll('.statistics__inputs__input_container select');
+                    let added_select_idx = 0;
+                    selects.forEach((el, idx) => {
+                        if (!position_select.includes(el.id) && el.value !== '') {
+                            if (added_select_idx === 0) {
+                                new_url += '?';
+                            }
+                            else {
+                                new_url += '&';
+                            }
+                            new_url += (el.name + '=' +el.value);
+                            added_select_idx++;
+                        }
+                    })
+                    location.href = new_url;
                 });
             }
         )
+        fetchData();
     })
     function prepareData(rowData) {
         const groupData = d3.group(rowData, (sample) => sample['Salary Range']);
@@ -425,14 +452,14 @@
             }
         });
         $.ajax({
-            url: 'server.php',
+            url: '/api/salaries',
             data: options,
-            success: (resp) => {
-                document.querySelector('#db-header .title-underscore').innerText = options['position'];
+            success: (data) => {
+                let job_name = options.hasOwnProperty('technology')?options['technology']: options['position'];
+                document.querySelector('#db-header .title-underscore').innerText = job_name;
                 document.querySelectorAll('.lead .field_text').forEach((el) => {
-                    el.innerText = options['position'];
+                    el.innerText = job_name;
                 });
-                let data = JSON.parse(resp);
                 let preparedData = prepareData(data);
                 let min_salary = 0;
                 let max_salary = 0;
@@ -461,42 +488,6 @@
             }
         })
     }
-
-    function initOptions() {
-        $.ajax({
-            url: 'options.php',
-            success: function (resp) {
-                const data = JSON.parse(resp);
-                for (const dataKey in data) {
-                    let value_list = data[dataKey];
-                    let select = document.querySelector(`select[name=${dataKey}]`);
-                    if (select !== null) {
-                        let isCheckedOption = false;
-                        if (dataKey !== 'position') {
-                            let option = document.createElement('option');
-                            option.innerText = 'All';
-                            option.value = '';
-                            select.appendChild(option);
-                            isCheckedOption = true;
-                        }
-                        value_list.forEach((value, key) => {
-                            let option = document.createElement('option');
-                            option.value = value;
-                            option.innerText = value;
-                            select.appendChild(option);
-                            if (!isCheckedOption) {
-                                select.value = value;
-                                isCheckedOption = true;
-                            }
-                        })
-                    }
-                }
-                fetchData();
-            }
-        })
-    }
-
-
 </script>
 </body>
 </html>

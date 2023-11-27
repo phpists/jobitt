@@ -14,5 +14,5 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [\App\Http\Controllers\StatisticsSalaryController::class, 'index']);
-Route::get('/{category}/', [\App\Http\Controllers\StatisticsSalaryController::class, 'index']);
-
+Route::get('salaries/{position}/{technology?}', [\App\Http\Controllers\StatisticsSalaryController::class, 'index'])->name('salaries');
+Route::get('/api/salaries', [\App\Http\Controllers\StatisticsSalaryController::class, 'filter_data'])->name('salaries.filter');

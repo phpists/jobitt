@@ -1,0 +1,365 @@
+:root {
+    --red: #D61437;
+    --red-pale: #FF5E7B;
+    --red-pale-transparent: #FF5E7B66;
+    --black: #37352f;
+    --light-gray: #cccccc;
+    --lighter-gray: #eeeeee;
+    --link_basic: #1876ac;
+    --link_hover: #ff5e99;
+    --dou_green: #06B9B1;
+    --light_green: #6AD29C;
+    --blue: #3CC5FF;
+    --sky_blue: #0075C9;
+    --outsource: #3C5BFF;
+    --dark_electric: #3C5BFF;
+    --darker_gray: #222222;
+    --gray: #BCBCBC;
+    --background-grey: #F5F5F5
+}
+
+.statistics {
+    max-width: 1040px;
+    margin: 50px auto;
+}
+
+.statistics__inputs {
+    max-width: 800px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px 2%;
+}
+
+.statistics__inputs .statistics__inputs__input_container {
+    flex-basis: 49%;
+}
+
+main {
+    padding: 0;
+}
+
+@media screen and (max-width: 1100px) {
+    main {
+        padding: 0 20px;
+    }
+}
+
+@media screen and (max-width: 700px){
+    .statistics__inputs .statistics__inputs__input_container {
+        flex-basis: 100%;
+    }
+}
+.statistics__inputs .statistics__inputs__input_container select {
+    padding: 9px 20px 9px 12px;
+    font-family: "Montserrat", sans-serif;
+    font-weight: 400;
+    background-color: #404040;
+    border: initial;
+    border-color: #404040;
+    border-right: 5px #404040 solid;
+    width: 100%;
+    box-sizing: border-box !important;
+    font-size: 20px;
+    border-radius: 8px;
+    line-height: 22px;
+    color: white;
+}
+
+.statistics__inputs__input_container label {
+    display: block;
+    font-size: 14px;
+    line-height: 14px;
+    margin-bottom: 6px;
+}
+
+#db-employment {
+    margin-top: 50px;
+    color: #606060;
+    display: flex;
+    justify-content: space-between;
+}
+
+#db-employment .item {
+    background-color: #fff;
+    color: #404040;
+    font-family: "Montserrat",sans-serif;
+    padding: 15px 15px 15px;
+    text-align: center;
+    cursor: pointer;
+    width: 100%;
+    transition: color .2s,background-color .2s;
+}
+
+#db-employment .item:nth-of-type(1) {
+    border-top-left-radius: 8px;
+
+}
+
+#db-employment .item:nth-last-of-type(1) {
+    border-top-right-radius: 8px;
+
+}
+
+#db-employment .item.active {
+    pointer-events: none;
+    background-color: #f2f2f2;
+    color: #606060;
+}
+
+#db-employment .item .value {
+    font-weight: bold;
+    font-size: 20px;
+    line-height: 20px;
+    margin-bottom: 6px;
+}
+
+#db-employment .item .name {
+    font-size: 14px;
+    line-height: 18px;
+    font-family: "Open Sans", sans-serif;
+}
+
+#db-charts {
+    background-color: #f2f2f2;
+    padding: 25px 30px 30px;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box !important;
+}
+
+#db-salary-summary {
+    max-width: 700px;
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+#db-salary-summary .point.quartile {
+    color: #08243f;
+    border-left-color: #08243f;
+}
+
+#db-salary-summary .point.median {
+    color: #f5750c;
+    border-left-color: #f5750c;
+}
+
+#db-salary-summary .point {
+    width: 100%;
+    max-width: 190px;
+    border-left-width: 3px;
+    border-left-style: solid;
+    padding-left: 7px;
+    font-family: "Open Sans", sans-serif;
+}
+
+#db-salary-summary .point .name {
+    font-size: 12px;
+    line-height: 12px;
+    color: #606060;
+    margin-bottom: 5px;
+}
+
+#db-salary-summary .point .value {
+    font-size: 28px;
+    line-height: 20px;
+    font-weight: bold;
+    font-family: "Montserrat", sans-serif;
+}
+
+#db-salary-summary .point .value .value-unit {
+    font-size: 16px;
+}
+
+#db-chart {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #606060;
+}
+
+#db-chart-text {
+    padding: 20px 0;
+    border-top: 1px solid #606060;
+    margin-top: 20px;
+    height: 450px;
+}
+
+#db-chart-text p{
+    font-family: "KyivTypeSans Medium";
+    font-size: 16px;
+    line-height: 18px;
+    font-weight: normal;
+}
+
+#tooltip {
+    font-family: "KyivTypeSans Medium",sans-serif;
+    pointer-events: none;
+    background: rgba(0, 0, 0, 0.9);
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    padding: 8px 15px 10px;
+    visibility: hidden;
+    color: white;
+    z-index: 100;
+    box-sizing: border-box;
+}
+
+#tooltip::after {
+    content: "";
+    display: block;
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid black;
+}
+
+#tooltip div.tt-name {
+    font-size: 14px;
+    line-height: 16px;
+    margin: -8px -15px 0;
+    padding: 8px 15px 5px;
+    border-bottom: 1px solid #404040;
+    margin-bottom: 5px;
+}
+
+#tooltip div.tt-value {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+#tooltip div.tt-answers {
+    font-size: 14px;
+    line-height: 14px;
+    color: #ccc;
+    margin-top: 2px;
+}
+
+#salary-facts {
+    font-family: "Montserrat",sans-serif;
+    font-size: 16px;
+    background: #e8e8e8;
+    padding: 15px 30px 20px;
+    margin-top: 20px;
+    border: 1px solid #d0d0d0;
+    border-radius: 10px
+}
+
+#salary-facts h4 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    font-family: "Montserrat", sans-serif;
+    font-weight: 700;
+}
+
+#salary-facts-blocks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px
+}
+
+#salary-facts a.salary-fact {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    width: 100%;
+    max-width: 120px;
+    padding: 3px 10px 3px;
+    text-decoration: none;
+    border-left: 3px #d0d0d0 solid;
+    color: #404040
+}
+
+#salary-facts a.salary-fact.active {
+    border-left-color: #b0b0b0;
+    background-color: #d2d2d2;
+    color: #606060;
+    pointer-events: none
+}
+
+#salary-facts a.salary-fact.anketa {
+    border-left-color: var(--dark_electric);
+    max-width: 170px
+}
+
+#salary-facts a.salary-fact span {
+    display: block
+}
+
+#salary-facts .sf-value {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 18px;
+    white-space: nowrap
+}
+
+#salary-facts .sf-name {
+    font-family: "Roboto",sans-serif;
+    font-size: 12px
+}
+
+#salary-facts a.salary-fact.anketa {
+    color: var(--dark_electric)
+}
+
+#salary-facts a.salary-fact:hover {
+    background: #fff;
+    border-left-color: #b0b0b0
+}
+
+#salary-facts a.salary-fact.anketa:hover {
+    background: var(--dark_electric);
+    border-left-color: #133ad8;
+    color: white
+}
+
+#db-header .lead {
+    font-family: "Montserrat",sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0;
+    font-weight: 400;
+    max-width: 860px;
+}
+
+#db-header h1 {
+    font-size: 45px;
+    line-height: 50px;
+    margin-bottom: 30px;
+    font-weight: 700;
+    font-family: "Montserrat", sans-serif;
+}
+
+#db-header {
+    margin-bottom: 45px;
+}
+
+@media (max-width: 768px) {
+    #salary-facts-blocks {
+        gap: 5px;
+        justify-content: center;
+    }
+
+    #salary-facts a.salary-fact {
+        display: block;
+        border: none;
+        background-color: #f2f2f2;
+        border-radius: 5px;
+    }
+}
+
+
+#db-header .title-underscore {
+    text-decoration: none;
+    color: var(--dark_electric);
+}

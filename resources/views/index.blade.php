@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <title>Title</title>
+    <meta name="description" content="Explore the comprehensive guide to high-tech salaries in {{isset($selected_technology)? $selected_technology: $selected_position}} for Israel 2023. Gain insights into average earnings, benefit trends, and how much professionals in the tech industry are earning.">
+    <title>2023 High-Tech Salary Trends in <name_field> Across Israel: In-Depth Analysis</title>
     <link rel="stylesheet" href="{{asset('styles/main.css')}}">
     <link rel="stylesheet" href="{{asset('styles/index.css')}}">
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
@@ -290,9 +291,9 @@
                 </div>
                 <div class="point median"><div class="name">Mediana</div><div class="value"><span class="value-num">14,000</span><span class="value-unit"> PLN</span></div></div><div class="point quartile q3"><div class="name">Kwartyl 3</div><div class="value"><span class="value-num">20,000</span><span class="value-unit"> PLN</span></div></div></div>
             <div id="db-chart"></div>
-            <div id="db-chart-text">
-                <p>Some text here</p>
-            </div>
+        </div>
+        <div id="db-chart-text">
+            <p>Some text here</p>
         </div>
     </section>
     <div id="tooltip">
@@ -457,6 +458,7 @@
             success: (data) => {
                 let job_name = options.hasOwnProperty('technology')?options['technology']: options['position'];
                 document.querySelector('#db-header .title-underscore').innerText = job_name;
+                document.title = document.title.replace('<name_field>', job_name)
                 document.querySelectorAll('.lead .field_text').forEach((el) => {
                     el.innerText = job_name;
                 });

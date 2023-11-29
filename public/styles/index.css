@@ -19,8 +19,8 @@
 }
 
 .statistics {
-    max-width: 1040px;
-    margin: 50px auto;
+    max-width: 1105px;
+    margin: 50px auto 0 auto;
 }
 
 .statistics__inputs {
@@ -76,6 +76,7 @@ main {
     margin-top: 50px;
     color: #606060;
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
 }
 
@@ -181,16 +182,15 @@ main {
 
 #db-chart-text {
     padding: 20px 0;
-    border-top: 1px solid #606060;
     margin-top: 20px;
-    height: 450px;
 }
 
 #db-chart-text p{
-    font-family: "KyivTypeSans Medium";
+    font-family: "Montserrat",sans-serif;
     font-size: 16px;
-    line-height: 18px;
-    font-weight: normal;
+    line-height: 24px;
+    letter-spacing: 0;
+    font-weight: 400;
 }
 
 #tooltip {
@@ -362,4 +362,54 @@ main {
 #db-header .title-underscore {
     text-decoration: none;
     color: var(--dark_electric);
+}
+
+#faq-section h2 {
+    font-size: 28px;
+    font-weight: 600;
+    font-family: "Montserrat", sans-serif;
+    margin-bottom: 20px;
+}
+
+button.accordion_btn {
+    width: 100%;
+    position: relative;
+    margin-bottom: 40px;
+    text-align: left;
+    z-index: 2;
+    background: white;
+    font-size: 20px;
+}
+
+button.accordion_btn {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 20px;
+    justify-content: space-between;
+    padding-right: 15px;
+    cursor: pointer;
+}
+
+.accordion_item .accordion_text {
+    max-height: 0;
+    position: relative;
+    top: -25px;
+    z-index: 1;
+    overflow-y: hidden;
+    font-size: 16px;
+    transition: max-height .3s linear;
+    padding-left: 20px;
+}
+
+.accordion_item.active .accordion_text {
+    max-height: 150px;
+}
+
+.accordion_item .accordion_btn__after {
+    font-weight: bold;
+}
+
+.min_salary::after, .max_salary::after, .mean_salary::after {
+    content: " NIS";
 }

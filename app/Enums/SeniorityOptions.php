@@ -8,5 +8,5 @@ enum SeniorityOptions: string
     case JUNIOR = 'Junior';
     case MIDDLE = 'Middle Level';
     case SENIOR = 'Senior';
-    case TEAM_LEADER = 'Team-Leader/Managment';
+    case TEAM_LEADER = 'Team-Leader/Management';
 }

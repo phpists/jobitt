@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Enums\ExperienceOptions;
 use App\Enums\LocationOptions;
 use App\Enums\SeniorityOptions;
+use App\Models\EditPage;
 use App\Services\LinkTransformService;
+use App\Services\StatsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
 class StatisticsSalaryController extends Controller
@@ -38,6 +41,23 @@ class StatisticsSalaryController extends Controller
         }
         return $exp_name;
     }
+
+    private function calculateStats(array $data, string $position, null|string $technology) {
+        $salaryData = [];
+        foreach ($data as $sample) {
+            $salaryData[] = $sample['Salary (₪)'];
+        }
+        sort($salaryData);
+        $stats = [];
+        $stats['field_text'] = $technology ?? $position;
+        $stats['mean_salary'] = StatsService::calculateMean($salaryData);
+        $stats['median_salary'] = StatsService::calculateMedian($salaryData);
+        $stats['min_salary'] = StatsService::calculateMin($salaryData);
+        $stats['max_salary'] = StatsService::calculateMax($salaryData);
+        $stats['top_three_benefits'] = StatsService::threeMostFrequentBenefits($data);
+        $stats['number_respondents'] = sizeof($data);
+        return $stats;
+    }
     public function index(Request $request, string $position=null, string $technology=null, $country=null)
     {
 
@@ -60,6 +80,7 @@ class StatisticsSalaryController extends Controller
                 }
             }
         }
+        $page = EditPage::query()->where('route_name', Route::currentRouteName())->first();
         $technology = LinkTransformService::redoTransform($technology);
         $salary_ranges = [];
         foreach (SeniorityOptions::cases() as $option) {
@@ -147,7 +168,8 @@ class StatisticsSalaryController extends Controller
             'selected_experience' => $request->get('experience'),
             'selected_location' => $request->get('location'),
             'selected_seniority' => $request->get('seniority'),
-            'job_statistics' => $job_statistics
+            'job_statistics' => $job_statistics,
+            'page' => $page
         ]);
     }
 
@@ -204,6 +226,9 @@ class StatisticsSalaryController extends Controller
                 $filteredData[] = $sample;
             }
         }
-        return response()->json($filteredData);
+        return response()->json([
+            'survey_data' => $filteredData,
+            'stats' => self::calculateStats($filteredData, $position, $technology)
+        ]);
     }
 }

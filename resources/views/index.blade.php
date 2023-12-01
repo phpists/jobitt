@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-
+    @php
+        $pattern = '/<span(?:\s+class="[\w\s]*")?>(.*?)<\/span>/';
+        $job_title = $selected_technology??$selected_position;
+    @endphp
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <meta name="description" content="Explore the comprehensive guide to high-tech salaries in {{isset($selected_technology)? $selected_technology: $selected_position}} for Israel 2023. Gain insights into average earnings, benefit trends, and how much professionals in the tech industry are earning.">
-    <title>2023 High-Tech Salary Trends in <name_field> Across Israel: In-Depth Analysis</title>
+    <meta name="description" content="{{preg_replace($pattern, $job_title, $page->description)}}">
+    <title>{{preg_replace($pattern, $job_title, $page->title)}}</title>
     <link rel="stylesheet" href="{{asset('styles/main.css')}}">
     <link rel="stylesheet" href="{{asset('styles/index.css')}}">
     <link data-n-head="ssr" rel="icon" type="image/svg" href="{{asset('img/favicon.svg')}}">
@@ -393,10 +396,9 @@
             @endif
         </ul>
         <div id="db-header">
-            <h1>Salary Data for <span class="title-underscore">QA Engineer</span> in Israel for 2023</h1>
+            <h1>{!! $page?->h1 !!}</h1>
             <div class="lead">
-                As we delve into 2023, the high-tech sector in Israel, particularly in <span class="field_text"></span>, presents a dynamic and evolving landscape. Salaries range from <span class="min_salary"></span> to <span class="max_salary"></span>, with the industry average at <span class="median_salary"></span>.
-                This sector not only rewards with financial incentives but also offers diverse benefits, including <span class="top_three_benefits"></span>, as reported by <span class="number_respondents"></span> professionals.
+                {!! $page?->content !!}
             </div>
 
             <div id="salary-facts">
@@ -462,7 +464,7 @@
         <div id="db-employment">
             <div class="item active">
                 <div class="value">
-                    <span class="value-num">14,000</span><span class="value-unit"> NIS</span>
+                    <span class="value-num">No data</span><span class="value-unit"> NIS</span>
                 </div>
                 <div class="name">Median salary for this job</div>
             </div>
@@ -471,26 +473,24 @@
                     <div class="point quartile q1">
                         <div class="name">Quartile 1</div>
                         <div class="value">
-                            <span class="value-num">9,000</span>
+                            <span class="value-num">No data</span>
                             <span class="value-unit"> NIS</span>
                         </div>
                     </div>
                     <div class="point median">
                         <div class="name">Median</div>
-                        <div class="value"><span class="value-num">14,000</span><span class="value-unit"> NIS</span></div>
+                        <div class="value"><span class="value-num">No data</span><span class="value-unit"> NIS</span></div>
                     </div>
                     <div class="point quartile q3">
                         <div class="name">Quartile 3</div>
-                        <div class="value"><span class="value-num">20,000</span><span class="value-unit"> NIS</span></div>
+                        <div class="value"><span class="value-num">No data</span><span class="value-unit"> NIS</span></div>
                     </div>
                 </div>
                 <div id="db-chart"></div>
             </div>
             <div id="db-chart-text">
-                <p>Salary trends in bustling tech hubs like Tel Aviv and Jerusalem show [Specific Trend or Statistic from Dataset]. Gender pay disparity in high-tech, notably in roles such as [Specific High-Paying Job Role], remains a talking point, with women earning [Percentage] less/more compared to men in similar positions.
-                    The high-tech sector in <span class="field_text"></span> is ripe with opportunities for those with [Specific Skill or Experience], where salaries can reach up to [Salary for Specific Skill/Experience].
-                    In-Depth Analysis Section
-                    The detailed salary report reveals how company size and location impact earning potential. For instance, professionals in <span class="field_text"></span> working in large-scale companies in [Highest Paying Region] reported earning an average of [Average Salary in Large Companies], based on responses from [Number of Respondents in Large Companies].
+                <p>
+                    {!! $page?->additional_content !!}
                 </p>
             </div>
             <section id="faq-section">
@@ -851,29 +851,21 @@
         $.ajax({
             url: '/api/salaries',
             data: options,
-            success: (data) => {
+            success: (resp) => {
+                let data = resp['survey_data']
                 let job_name = document.querySelector('#technology_select option:checked').innerText;
                 if (job_name === 'All') {
                     job_name = document.querySelector('#position_select option:checked').innerText;
                 }
-                document.querySelector('#db-header .title-underscore').innerText = job_name;
-                document.title = document.title.replace('<name_field>', job_name)
-                document.querySelectorAll('.lead .field_text').forEach((el) => {
-                    el.innerText = job_name;
-                });
-                document.querySelectorAll('#faq-section .field_text').forEach((el) => {
-                    el.innerText = job_name;
-                });
-                document.querySelectorAll('#faq-section .field_text').forEach((el) => {
-                    el.innerText = job_name;
-                });
+                document.querySelectorAll('.variable').forEach((el) => {
+                    el.classList.remove('variable')
+                })
+                // document.querySelector('#db-header .title-underscore').innerText = job_name;
+                // document.title = document.title.replace('<span class="field_text">Field_Name</span>', job_name)
                 let preparedData = prepareData(data);
-                let min_salary = 0;
-                let max_salary = 0;
                 let f_quantile = 0;
                 let m_quantile = 0;
                 let th_quantile = 0;
-                let mean_salary = 0;
                 const div = document.querySelector("#db-chart");
                 div.innerHTML = `<div style='height: ${height}px'>
                         <p style="font-weight: 600; font-size: 24px">Not enough data to display</p>
@@ -882,29 +874,18 @@
                     f_quantile = d3.quantile(data.map((data) => data['Salary (₪)']), .25);
                     m_quantile = d3.quantile(data.map((data) => data['Salary (₪)']), .5);
                     th_quantile = d3.quantile(data.map((data) => data['Salary (₪)']), .75);
-                    max_salary = d3.max(data.map((data) => data['Salary (₪)']))
-                    min_salary = d3.min(data.map((data) => data['Salary (₪)']))
-                    mean_salary = Math.round(d3.mean(data.map((data) => data['Salary (₪)'])))
                     plotSallaryChart(preparedData);
                 }
                 document.querySelector('.q1 .value-num').innerText = f_quantile;
                 document.querySelector('.median .value-num').innerText = m_quantile;
                 document.querySelector('.q3 .value-num').innerText = th_quantile;
                 document.querySelector('#db-employment .value-num').innerText = m_quantile;
-                document.querySelector('.lead .max_salary').innerText = max_salary;
-                document.querySelector('.lead .median_salary').innerText = m_quantile;
-                document.querySelector('.lead .min_salary').innerText = min_salary;
-                document.querySelector('.lead .number_respondents').innerText = data.length;
-                document.querySelectorAll('.number_respondents').forEach((el) => {
-                    el.innerText = data.length;
-                })
-                document.querySelectorAll('.mean_salary').forEach((el) => {
-                    el.innerText = mean_salary;
-                })
-                let mostFrequentBenefits = mostFrequent(data, 'Benefits');
-                document.querySelectorAll('.top_three_benefits').forEach((el) => {
-                    el.innerText = mostFrequentBenefits;
-                });
+                for (const selector in resp['stats']) {
+                    let value = resp['stats'][selector];
+                    document.querySelectorAll('.' + selector).forEach((el) => {
+                        el.innerText = value;
+                    })
+                }
             }
         })
     }

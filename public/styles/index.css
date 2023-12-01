@@ -359,7 +359,7 @@ main {
 }
 
 
-#db-header .title-underscore {
+#db-header .field_text {
     text-decoration: none;
     color: var(--dark_electric);
 }
@@ -410,6 +410,6 @@ button.accordion_btn {
     font-weight: bold;
 }
 
-.min_salary::after, .max_salary::after, .mean_salary::after {
+.min_salary::after, .max_salary::after, .mean_salary::after, .median_salary::after {
     content: " NIS";
 }

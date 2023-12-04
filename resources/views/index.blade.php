@@ -409,7 +409,7 @@
                 <h4>What are the salary ranges in the tech industry?</h4>
                 <div id="salary-facts-blocks">
                     @foreach($salary_ranges as $title=>$salary_sample)
-                        <a class="salary-fact" href="/salaries?position={{\App\Services\LinkTransformService::transformPositionName($selected_position)}}">
+                        <a class="salary-fact" href={{"/salaries".(isset($selected_position)?"?position=".\App\Services\LinkTransformService::transformPositionName($selected_position): "")}}>
                             <span class="sf-name">{{$title}}</span>
                             <span class="sf-value">{{$salary_sample}} NIS</span>
                         </a>
@@ -423,20 +423,23 @@
             <div class="statistics__inputs__input_container">
                 <label for="position_select">Position</label>
                 <select name="position" id="position_select">
+                    <option value="">All</option>
                     @foreach($positions as $position)
                         <option value="{{\App\Services\LinkTransformService::transformPositionName($position)}}" @if($position===$selected_position) selected @endif>{{$position}}</option>
                     @endforeach
                 </select>
             </div>
-            <div class="statistics__inputs__input_container">
-                <label for="technology_select">Technology</label>
-                <select name="technology" id="technology_select">
-                    <option value="">All</option>
-                    @foreach($technologies as $technology)
-                        <option value="{{\App\Services\LinkTransformService::transformPositionName($technology)}}" @if(isset($selected_technology) && $technology===$selected_technology) selected @endif>{{$technology}}</option>
-                    @endforeach
-                </select>
-            </div>
+            @if(isset($selected_position))
+                <div class="statistics__inputs__input_container">
+                    <label for="technology_select">Technology</label>
+                    <select name="technology" id="technology_select">
+                        <option value="">All</option>
+                        @foreach($technologies as $technology)
+                            <option value="{{\App\Services\LinkTransformService::transformPositionName($technology)}}" @if(isset($selected_technology) && $technology===$selected_technology) selected @endif>{{$technology}}</option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
             <div class="statistics__inputs__input_container">
                 <label for="city_select">Region</label>
                 <select name="location" id="city_select">
@@ -490,59 +493,109 @@
                 <div id="db-chart"></div>
             </div>
             <div id="db-chart-text">
-                <p>
+                <p style="width: 100%">
                     {!! $page?->additional_content !!}
                 </p>
             </div>
             <section id="faq-section">
                 <h2>FAQ</h2>
-                <div class="accordion_item">
-                    <button class="accordion_btn">
-                        <span>What is the average salary in high-tech for <span class="field_text"></span> in Israel, 2023?</span>
-                        <span class="accordion_btn__after">+</span>
-                    </button>
-                    <p class="accordion_text">
-                        Based on our survey of <span class="number_respondents"></span>, the average salary in <span class="field_text"></span> is <span class="mean_salary"></span>, with regional variations.
-                    </p>
-                </div>
-                <div class="accordion_item">
-                    <button class="accordion_btn">
-                        <span> What are the common benefits in high-tech jobs in <span class="field_text"></span>?</span>
-                        <span class="accordion_btn__after">+</span>
-                    </button>
-                    <p class="accordion_text">
-                        Key benefits include <span class="top_three_benefits"></span>, as reported by <span class="number_respondents"></span>.
-                    </p>
-                </div>
-                <div class="accordion_item">
-                    <button class="accordion_btn">
+                @if($page->route_name === \App\Models\EditPage::MAIN_PAGE)
+                    <div class="accordion_item">
+                        <button class="accordion_btn">
+                            <span>What is the average salary of high-tech in Israel, 2023?</span>
+                            <span class="accordion_btn__after">+</span>
+                        </button>
+                        <p class="accordion_text">
+                            Based on our survey of <span class="number_respondents"></span>, the average salary in high-tech is <span class="mean_salary"></span>, with regional variations.
+                        </p>
+                    </div>
+                    <div class="accordion_item">
+                        <button class="accordion_btn">
+                            <span> What are the common benefits in high-tech jobs in Israel?</span>
+                            <span class="accordion_btn__after">+</span>
+                        </button>
+                        <p class="accordion_text">
+                            Key benefits include <span class="top_three_benefits"></span>, as reported by <span class="number_respondents"></span>.
+                        </p>
+                    </div>
+                    <div class="accordion_item">
+                        <button class="accordion_btn">
+                            <span> How does gender affect salary in high-tech?
+                            </span>
+                            <span class="accordion_btn__after">+</span>
+                        </button>
+                        <p class="accordion_text">
+                            Gender pay disparity exists, with
+                            {{(array_key_exists('Male', $job_statistics['Gender'])? $job_statistics['Gender']['Male']: 0).' NIS of Males and '.(array_key_exists('Female', $job_statistics['Gender'])? $job_statistics['Gender']['Female']: 0).' NIS of Females'}} in high-tech roles.
+                        </p>
+                    </div>
+                    <div class="accordion_item">
+                        <button class="accordion_btn">
+                            <span>Which regions in Israel offer the highest salaries of high-tech?</span>
+                            <span class="accordion_btn__after">+</span>
+                        </button>
+                        <p class="accordion_text">
+                            Salaries are highest in regions like {{array_key_last($job_statistics['Location'])}}, with an average of {{$job_statistics['Location'][array_key_last($job_statistics['Location'])]}} NIS.
+                        </p>
+                    </div>
+                    <div class="accordion_item">
+                        <button class="accordion_btn">
+                            <span>How does experience level impact high-tech salaries in Israel?</span>
+                            <span class="accordion_btn__after">+</span>
+                        </button>
+                        <p class="accordion_text">
+                            Experience significantly influences earnings. Professionals with {{$job_statistics['Experience']['exp_name']}} of experience average around {{$job_statistics['Experience']['min']}} NIS and {{$job_statistics['Experience']['max']}} NIS.
+                        </p>
+                    </div>
+                @else
+                    <div class="accordion_item">
+                        <button class="accordion_btn">
+                            <span>What is the average salary in high-tech{!!(' for <span class="field_text"></span>')!!} in Israel, 2023?</span>
+                            <span class="accordion_btn__after">+</span>
+                        </button>
+                        <p class="accordion_text">
+                            Based on our survey of <span class="number_respondents"></span>, the average salary in <span class="field_text"></span> is <span class="mean_salary"></span>, with regional variations.
+                        </p>
+                    </div>
+                    <div class="accordion_item">
+                        <button class="accordion_btn">
+                            <span> What are the common benefits in high-tech jobs in <span class="field_text"></span>?</span>
+                            <span class="accordion_btn__after">+</span>
+                        </button>
+                        <p class="accordion_text">
+                            Key benefits include <span class="top_three_benefits"></span>, as reported by <span class="number_respondents"></span>.
+                        </p>
+                    </div>
+                    <div class="accordion_item">
+                        <button class="accordion_btn">
                             <span> How does gender affect salary in high-tech for <span class="field_text"></span>?
                             </span>
-                        <span class="accordion_btn__after">+</span>
-                    </button>
-                    <p class="accordion_text">
-                        Gender pay disparity exists, with
-                        {{(array_key_exists('Male', $job_statistics['Gender'])? $job_statistics['Gender']['Male']: 0).' NIS of Males and '.(array_key_exists('Female', $job_statistics['Gender'])? $job_statistics['Gender']['Female']: 0).' NIS of Females'}} in roles like <span class="field_text"></span>.
-                    </p>
-                </div>
-                <div class="accordion_item">
-                    <button class="accordion_btn">
-                        <span>Which regions in Israel offer the highest salaries in high-tech for <span class="field_text"></span>?</span>
-                        <span class="accordion_btn__after">+</span>
-                    </button>
-                    <p class="accordion_text">
-                        Salaries are highest in regions like {{array_key_last($job_statistics['Location'])}}, with an average of {{$job_statistics['Location'][array_key_last($job_statistics['Location'])]}} NIS.
-                    </p>
-                </div>
-                <div class="accordion_item">
-                    <button class="accordion_btn">
-                        <span>How does experience level impact high-tech salaries in <span class="field_text"></span>?</span>
-                        <span class="accordion_btn__after">+</span>
-                    </button>
-                    <p class="accordion_text">
-                        Experience significantly influences earnings. Professionals with {{$job_statistics['Experience']['exp_name']}} of experience average around {{$job_statistics['Experience']['min']}} NIS and {{$job_statistics['Experience']['max']}} NIS.
-                    </p>
-                </div>
+                            <span class="accordion_btn__after">+</span>
+                        </button>
+                        <p class="accordion_text">
+                            Gender pay disparity exists, with
+                            {{(array_key_exists('Male', $job_statistics['Gender'])? $job_statistics['Gender']['Male']: 0).' NIS of Males and '.(array_key_exists('Female', $job_statistics['Gender'])? $job_statistics['Gender']['Female']: 0).' NIS of Females'}} in roles like <span class="field_text"></span>.
+                        </p>
+                    </div>
+                    <div class="accordion_item">
+                        <button class="accordion_btn">
+                            <span>Which regions in Israel offer the highest salaries in high-tech for <span class="field_text"></span>?</span>
+                            <span class="accordion_btn__after">+</span>
+                        </button>
+                        <p class="accordion_text">
+                            Salaries are highest in regions like {{array_key_last($job_statistics['Location'])}}, with an average of {{$job_statistics['Location'][array_key_last($job_statistics['Location'])]}} NIS.
+                        </p>
+                    </div>
+                    <div class="accordion_item">
+                        <button class="accordion_btn">
+                            <span>How does experience level impact high-tech salaries in <span class="field_text"></span>?</span>
+                            <span class="accordion_btn__after">+</span>
+                        </button>
+                        <p class="accordion_text">
+                            Experience significantly influences earnings. Professionals with {{$job_statistics['Experience']['exp_name']}} of experience average around {{$job_statistics['Experience']['min']}} NIS and {{$job_statistics['Experience']['max']}} NIS.
+                        </p>
+                    </div>
+                @endif
             </section>
         </div>
     </section>
@@ -677,16 +730,12 @@
         document.querySelectorAll('.statistics__inputs__input_container select').forEach(
             (el) => {
                 el.addEventListener('change', function(ev) {
-                    let new_url = '/salaries/' + document.getElementById("position_select").value;
-                    let technology = document.getElementById("technology_select").value;
-                    let location_value = document.getElementById("city_select").value;
-                    if (technology !== '' && ev.currentTarget.id !== 'position_select') {
+                    let new_url = '/salaries/Israel/' + document.getElementById("position_select").value;
+                    let technology = document.getElementById("technology_select")?.value;
+                    if (technology !== '' && (typeof technology === 'string') && ev.currentTarget.id !== 'position_select') {
                         new_url += ('/' + technology);
                     }
-                    if (location_value !== '' && ev.currentTarget.id !== 'position_select') {
-                        new_url += ('/' + location_value);
-                    }
-                    let url_parts = ['position_select', 'technology_select', 'city_select'];
+                    let url_parts = ['position_select', 'technology_select'];
                     let selects = document.querySelectorAll('.statistics__inputs__input_container select');
                     let added_select_idx = 0;
                     selects.forEach((el, idx) => {
@@ -858,9 +907,9 @@
             data: options,
             success: (resp) => {
                 let data = resp['survey_data']
-                let job_name = document.querySelector('#technology_select option:checked').innerText;
+                let job_name = document.querySelector('#technology_select option:checked')?.innerText;
                 if (job_name === 'All') {
-                    job_name = document.querySelector('#position_select option:checked').innerText;
+                    job_name = document.querySelector('#position_select option:checked')?.innerText;
                 }
                 document.querySelectorAll('.variable').forEach((el) => {
                     el.classList.remove('variable')

@@ -34,7 +34,9 @@
                                 <label>Select job position</label>
                                 <select class="form-control" name="route_name" required id="">
                                     <option class="position-option" value="{{\App\Models\EditPage::DEFAULT_PAGE}}">Default page</option>
-                                    @foreach($jobs as $job=>$technologies)
+                                    <option class="position-option" value="{{\App\Models\EditPage::EMPTY_RESULT_PAGE}}">Empty value page</option>
+                                    <option class="position-option" value="{{\App\Models\EditPage::MAIN_PAGE}}">Main(index) page</option>
+                                @foreach($jobs as $job=>$technologies)
                                         <option class="position-option" value="{{$job}}">{{$job}}</option>
                                         @foreach($technologies as $technology)
                                             <option value="{{$technology}}">{{$technology}}</option>

@@ -13,7 +13,7 @@ class EditPage extends Model
 
     const EMPTY_RESULT_PAGE = 'Empty results page';
 
-    const START_PAGE = 'Start(index) page';
+    const MAIN_PAGE = 'Start(index) page';
 
     protected $fillable = ['title', 'h1', 'description', 'content', 'additional_content', 'route_name'];
 

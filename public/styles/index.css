@@ -183,6 +183,7 @@ main {
 #db-chart-text {
     padding: 20px 0;
     margin-top: 20px;
+    width: 100%;
 }
 
 #db-chart-text p{
@@ -362,6 +363,10 @@ main {
 #db-header .field_text {
     text-decoration: none;
     color: var(--dark_electric);
+}
+
+#faq-section {
+    width: 100%;
 }
 
 #faq-section h2 {

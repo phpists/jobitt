@@ -23,28 +23,21 @@
     <div class="container">
         <div class="card card-custom">
             <div class="card-header">
-                <h1 class="card-title">Edit page</h1>
+                <h1 class="card-title">Edit {{$page_content->route_name}}</h1>
             </div>
             <div class="card-body">
                 <form action="{{route('admin.pages.update')}}" id="editPageForm" method="POST">
                     @csrf
-                    <input type="hidden" name="id" value="{{$page_content?->id}}">
-                    <div class="row">
-                        <div class="col">
-                            <div class="form-group">
-                                <label>Select job position</label>
-                                <select class="form-control" name="route_name" required id="">
-                                    <option @if($page_content->route_name === \App\Models\EditPage::DEFAULT_PAGE) selected @endif class="position-option" value="{{\App\Models\EditPage::DEFAULT_PAGE}}">Default page</option>
-                                    @foreach($jobs as $job=>$technologies)
-                                        <option @if($page_content->route_name === $job) selected @endif class="position-option" value="{{$job}}">{{$job}}</option>
-                                        @foreach($technologies as $technology)
-                                            <option @if($page_content->route_name === $technology) selected @endif value="{{$technology}}">{{$technology}}</option>
-                                        @endforeach
-                                    @endforeach
-                                </select>
-                            </div>
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
                         </div>
-                    </div>
+                    @endif
+                    <input type="hidden" name="id" value="{{$page_content?->id}}">
                     <div class="row">
                         <div class="col">
                             <div class="form-group">

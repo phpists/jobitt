@@ -46,7 +46,6 @@ class EditPageController extends Controller
 
     public function update(Request $request) {
         $data = $request->validate([
-            'route_name' => ['required', 'string', 'unique:edit_pages,route_name'],
             'content' => ['required', 'string'],
             'description' => ['required', 'string'],
             'additional_content' => ['nullable', 'string'],
@@ -64,7 +63,7 @@ class EditPageController extends Controller
 
     public function delete(Request $request, $id) {
         $page_content = EditPage::query()->findOrFail($id);
-        if ($page_content->route_name === EditPage::DEFAULT_PAGE) {
+        if (in_array($page_content->route_name, [EditPage::DEFAULT_PAGE, EditPage::EMPTY_RESULT_PAGE, EditPage::MAIN_PAGE])) {
             return redirect()->back()->with('error', 'Default page cannot be deleted');
         }
         $page_content->delete();

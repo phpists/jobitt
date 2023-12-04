@@ -16,8 +16,8 @@ Route::post('authenticate', [\App\Http\Controllers\Admin\AuthController::class, 
 Route::post('register', [\App\Http\Controllers\Admin\AuthController::class, 'register'])->name('register');
 Route::get('/', [\App\Http\Controllers\StatisticsSalaryController::class, 'index'])->name('home');
 Route::get('/salaries', [\App\Http\Controllers\StatisticsSalaryController::class, 'index']);
-Route::get('salaries/{position}/{technology?}', [\App\Http\Controllers\StatisticsSalaryController::class, 'index'])->name('salaries');
-Route::get('/api/salaries', [\App\Http\Controllers\StatisticsSalaryController::class, 'filter_data'])->name('salaries.filter');
+Route::get('salaries/{position}/{technology?}/{location?}', [\App\Http\Controllers\StatisticsSalaryController::class, 'index'])->name('salaries');
+Route::get('/api/salaries', [\App\Http\Controllers\StatisticsSalaryController::class, 'stats_data'])->name('salaries.filter');
 Route::group(['prefix' => 'admin'], function () {
     Route::get('login', [\App\Http\Controllers\Admin\AuthController::class, 'login'])->name('admin.login');
     Route::group(['middleware' => 'auth'], function () {

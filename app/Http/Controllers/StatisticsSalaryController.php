@@ -58,7 +58,7 @@ class StatisticsSalaryController extends Controller
         $stats['number_respondents'] = sizeof($data);
         return $stats;
     }
-    public function index(Request $request, string $position=null, string $technology=null, $country=null)
+    public function index(Request $request, string $position=null, string $technology=null, $selected_location=null)
     {
 
         $positions = [];
@@ -70,7 +70,7 @@ class StatisticsSalaryController extends Controller
         $job_type = 'technical';
         foreach ($data as $job_role=>$job_technologies) {
             if ($position === null) {
-                return redirect(route('salaries', ['position' => $job_role]));
+                return redirect(route('salaries', ['position' => LinkTransformService::transformPositionName($job_role)]));
             }
             $position = LinkTransformService::redoTransform($position);
             $positions[] = $job_role;
@@ -80,8 +80,13 @@ class StatisticsSalaryController extends Controller
                 }
             }
         }
-        $page = EditPage::query()->where('route_name', Route::currentRouteName())->first();
-        $technology = LinkTransformService::redoTransform($technology);
+        if ($technology !== null) {
+            $technology = LinkTransformService::redoTransform($technology);
+        }
+        $page = EditPage::query()->where('route_name', ($technology??$position))->first();
+        if ($page === null) {
+            $page = EditPage::query()->where('route_name', EditPage::DEFAULT_PAGE)->first();
+        }
         $salary_ranges = [];
         foreach (SeniorityOptions::cases() as $option) {
             $salary_ranges[$option->value] = [];
@@ -104,30 +109,38 @@ class StatisticsSalaryController extends Controller
                     }
                 }
             }
-            if (in_array($sample['Job Role'], $technologies) || $sample['Job Role'] === $position) {
-                if (!array_key_exists($sample['Gender'], $job_statistics['Gender'])) {
-                    $job_statistics['Gender'][$sample['Gender']] = ['sum' => 0, 'count' => 0];
-                }
-                $job_statistics['Gender'][$sample['Gender']]['sum'] += $sample['Salary (₪)'];
-                $job_statistics['Gender'][$sample['Gender']]['count'] += 1;
-                if (!array_key_exists($sample['Location'], $job_statistics['Location'])) {
-                    $job_statistics['Location'][$sample['Location']] = ['sum' => 0, 'count' => 0];
-                }
-                $job_statistics['Location'][$sample['Location']]['sum'] += $sample['Salary (₪)'];
-                $job_statistics['Location'][$sample['Location']]['count'] += 1;
-                $current_exp = self::convertYearsExperience($sample['Years of Experience']);
-                if ($job_statistics['Experience']['exp_years'] < $sample['Years of Experience'] && ($current_exp !== $job_statistics['Experience']['exp_years'])) {
-                    $job_statistics['Experience'] = [
-                        'exp_years' => $sample['Years of Experience'],
-                        'exp_name' => $current_exp,
-                        'min' => $sample['Salary (₪)'],
-                        'max' => $sample['Salary (₪)']
-                    ];
-                }
-                elseif ($current_exp === $job_statistics['Experience']['exp_name']) {
-                    $job_statistics['Experience']['min'] = min([$sample['Salary (₪)'], $job_statistics['Experience']['min']]);
-                    $job_statistics['Experience']['max'] = max([$sample['Salary (₪)'], $job_statistics['Experience']['max']]);
-                }
+        }
+        $filtered_data = $this->filter_data(
+            $survey_data,
+            $technologies,
+            $request->get('seniority'),
+            $request->get('location'),
+            $request->get('experience'),
+            $technology);
+        foreach ($filtered_data as $sample) {
+
+            if (!array_key_exists($sample['Gender'], $job_statistics['Gender'])) {
+                $job_statistics['Gender'][$sample['Gender']] = ['sum' => 0, 'count' => 0];
+            }
+            $job_statistics['Gender'][$sample['Gender']]['sum'] += $sample['Salary (₪)'];
+            $job_statistics['Gender'][$sample['Gender']]['count'] += 1;
+            if (!array_key_exists($sample['Location'], $job_statistics['Location'])) {
+                $job_statistics['Location'][$sample['Location']] = ['sum' => 0, 'count' => 0];
+            }
+            $job_statistics['Location'][$sample['Location']]['sum'] += $sample['Salary (₪)'];
+            $job_statistics['Location'][$sample['Location']]['count'] += 1;
+            $current_exp = self::convertYearsExperience($sample['Years of Experience']);
+            if ($job_statistics['Experience']['exp_years'] < $sample['Years of Experience'] && ($current_exp !== $job_statistics['Experience']['exp_years'])) {
+                $job_statistics['Experience'] = [
+                    'exp_years' => $sample['Years of Experience'],
+                    'exp_name' => $current_exp,
+                    'min' => $sample['Salary (₪)'],
+                    'max' => $sample['Salary (₪)']
+                ];
+            }
+            elseif ($current_exp === $job_statistics['Experience']['exp_name']) {
+                $job_statistics['Experience']['min'] = min([$sample['Salary (₪)'], $job_statistics['Experience']['min']]);
+                $job_statistics['Experience']['max'] = max([$sample['Salary (₪)'], $job_statistics['Experience']['max']]);
             }
         }
         foreach ($job_statistics['Gender'] as $gender => $statistic) {
@@ -166,37 +179,15 @@ class StatisticsSalaryController extends Controller
             'selected_position' => $position,
             'selected_technology' => $technology,
             'selected_experience' => $request->get('experience'),
-            'selected_location' => $request->get('location'),
+            'selected_location' => $selected_location,
             'selected_seniority' => $request->get('seniority'),
             'job_statistics' => $job_statistics,
             'page' => $page
         ]);
     }
 
-    public function filter_data(Request $request)
-    {
-        $positions = [];
+    private function filter_data(array $data, array $positions, string|null $seniority, string|null $location, string|null $experience, string|null $technology): array {
         $filteredData = [];
-        $position = $request->get('position');
-        if ($position === null) {
-            return response()->json(['error' => 'position should be passed'], 400);
-        }
-        $position = LinkTransformService::redoTransform($position);
-        $technology = LinkTransformService::redoTransform($request->get('technology'));
-        $seniority = $request->get('seniority');
-        $experience = $request->get('experience');
-        $location = $request->get('location');
-        $positions_data = json_decode(Storage::disk('local')->get('roles.json'), true);
-        foreach ($positions_data as $job_role => $job_technologies) {
-            if ($position === $job_role) {
-                $positions[] = $job_role;
-                foreach ($job_technologies as $job_technology) {
-                    $positions[] = $job_technology;
-                }
-                break;
-            }
-        }
-        $data = json_decode(Storage::disk('local')->get('Salary_Survey_Dataset.json'), true);
         foreach ($data as $sample) {
             $is_accepted = true;
             $is_accepted = isset($seniority)?$seniority === $sample[self::FilterOptions['seniority']]: $is_accepted;
@@ -226,6 +217,33 @@ class StatisticsSalaryController extends Controller
                 $filteredData[] = $sample;
             }
         }
+        return $filteredData;
+    }
+
+    public function stats_data(Request $request)
+    {
+        $positions = [];
+        $position = $request->get('position');
+        if ($position === null) {
+            return response()->json(['error' => 'position should be passed'], 400);
+        }
+        $position = LinkTransformService::redoTransform($position);
+        $technology = LinkTransformService::redoTransform($request->get('technology'));
+        $seniority = $request->get('seniority');
+        $experience = $request->get('experience');
+        $location = $request->get('location');
+        $positions_data = json_decode(Storage::disk('local')->get('roles.json'), true);
+        foreach ($positions_data as $job_role => $job_technologies) {
+            if ($position === $job_role) {
+                $positions[] = $job_role;
+                foreach ($job_technologies as $job_technology) {
+                    $positions[] = $job_technology;
+                }
+                break;
+            }
+        }
+        $data = json_decode(Storage::disk('local')->get('Salary_Survey_Dataset.json'), true);
+        $filteredData = $this->filter_data($data, $positions, $seniority, $location, $experience, $technology);
         return response()->json([
             'survey_data' => $filteredData,
             'stats' => self::calculateStats($filteredData, $position, $technology)

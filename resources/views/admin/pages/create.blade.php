@@ -16,6 +16,9 @@
         .variable-option:hover {
             background: #15b0a9;
         }
+        .position-option {
+            font-weight: bold;
+        }
     </style>
     <div class="container">
         <div class="card card-custom">
@@ -28,8 +31,16 @@
                     <div class="row">
                         <div class="col">
                             <div class="form-group">
-                                <label>Route Name(<span class="text-danger font-weight-bold">!important</span> name should be same as in <strong>web.php</strong> file)</label>
-                                <input required name="route_name" type="text" class="form-control">
+                                <label>Select job position</label>
+                                <select class="form-control" name="route_name" required id="">
+                                    <option class="position-option" value="{{\App\Models\EditPage::DEFAULT_PAGE}}">Default page</option>
+                                    @foreach($jobs as $job=>$technologies)
+                                        <option class="position-option" value="{{$job}}">{{$job}}</option>
+                                        @foreach($technologies as $technology)
+                                            <option value="{{$technology}}">{{$technology}}</option>
+                                        @endforeach
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                     </div>

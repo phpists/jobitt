@@ -72,7 +72,16 @@ class StatsService
                 }
             }
         }
-
-        return join(', ', [$biggestFrequency['name'], $secondFrequency['name'], $thirdFrequency['name']]);
+        $benefit_str = '';
+        if (isset($biggestFrequency['name'])) {
+            $benefit_str .= $biggestFrequency['name'];
+        }
+        if (isset($secondFrequency['name'])) {
+            $benefit_str .= $secondFrequency['name'];
+        }
+        if (isset($thirdFrequency['name'])) {
+            $benefit_str .= $thirdFrequency['name'];
+        }
+        return $benefit_str;
     }
 }

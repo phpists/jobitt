@@ -5,12 +5,10 @@
         </div>
     @endif
 
-    @if ($errors->any())
-        @foreach ($errors->all() as $error)
-            <div class="alert alert-danger" role="alert">
-                {{ $error }}
-            </div>
-        @endforeach
+    @if(session()->get('error'))
+        <div class="alert alert-error" style="background: red; color: white" role="alert">
+            {{ session()->get('error') }}
+        </div>
     @endif
 </div>
 

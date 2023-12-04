@@ -11,24 +11,12 @@
 
         <!--begin::Container-->
         <div class="container-fluid">
+            @include('admin.layouts.includes.messages')
             <!--begin::Card-->
             <div class="card card-custom">
                 <!--begin::Body-->
                 <div class="card-body pb-3">
-                    <div class="row">
-                        <div class="col">
-                            <div class="mb-7">
-                                <form method="GET">
-                                    <div class="input-icon">
-                                        <input id="search_input" type="text" name="search"
-                                               data-type="{{ request()->get('type') }}"
-                                               class="form-control form-control-solid"
-                                               placeholder="Поиск" value="{{ request()->input('search') }}"/>
-                                        <span><i class="flaticon2-search-1 text-muted"></i></span>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
+                    <div class="row justify-content-end">
                         <div class="col-auto">
                             <a href="{{route('admin.pages.create')}}" class="btn btn-primary font-weight-bold">
                                 <i class="fas fa-plus mr-2"></i>Добавить
@@ -47,10 +35,7 @@
                                         ID
                                     </th>
                                     <th class="pr-0 text-center">
-                                        Route Name for page
-                                    </th>
-                                    <th class="pr-0 text-center">
-                                        Route exist(whether the given route name is present in web.php)
+                                        Job Title
                                     </th>
                                     <th class="pr-0 text-center">
                                         Actions
@@ -66,11 +51,6 @@
                                         <td class="text-center">
                                             <span class="text-dark-75 d-block font-size-lg">
                                                 {{ $page->route_name }}
-                                            </span>
-                                        </td>
-                                        <td class="text-center">
-                                            <span class="text-dark-75 d-block font-size-lg">
-                                                {!!   \Illuminate\Support\Facades\Route::has($page->route_name)? 'Yes': "<span class='text-danger'>No</span>" !!}
                                             </span>
                                         </td>
                                         <td class="text-center pr-0">

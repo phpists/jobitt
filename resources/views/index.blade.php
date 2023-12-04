@@ -230,7 +230,9 @@
                             </div>
                         </div>
                     </div>
-                    <div data-v-51576258="" class="auth-links"><a data-v-51576258="" href="https://jobitt.com/login" class="btn-dark signin-link">Sign in</a> <a data-v-51576258="" href="https://jobitt.com/register" class="btn-black signup-link">
+                    <div data-v-51576258="" class="auth-links">
+                        <a data-v-51576258="" href="https://jobitt.com/login" class="btn-dark signin-link">Sign in</a>
+                        <a data-v-51576258="" href="https://jobitt.com/register" class="btn-black signup-link">
                             Sign up
                         </a></div> <!---->
                 </div>
@@ -383,12 +385,14 @@
         <ul data-v-6977ea14="" class="breadcrumb">
             <li>
                 <a href="https://jobitt.com/" class="nuxt-link-active">Home</a>
-                <span>/</span>
+                @if(isset($selected_position)) <span>/</span> @endif
             </li>
-            <li>
-                <a href="{{route('salaries', ['position' => $selected_position])}}" class="@if(isset($selected_technology)) nuxt-link-active @else breadcrumb-latest @endif">{{$selected_position}}</a>
-                @if(isset($selected_technology)) <span>/</span> @endif
-            </li>
+            @if(isset($selected_position))
+                <li>
+                    <a href="{{route('salaries', ['position' => $selected_position])}}" class="@if(isset($selected_technology)) nuxt-link-active @else breadcrumb-latest @endif">{{$selected_position}}</a>
+                    @if(isset($selected_technology)) <span>/</span> @endif
+                </li>
+            @endif
             @if(isset($selected_technology))
                 <li>
                     <span class="breadcrumb-latest">{{$selected_technology}}</span>
@@ -405,7 +409,7 @@
                 <h4>What are the salary ranges in the tech industry?</h4>
                 <div id="salary-facts-blocks">
                     @foreach($salary_ranges as $title=>$salary_sample)
-                        <a class="salary-fact" href="/salaries?position={{\App\Services\LinkTransformService::transformPositionName($selected_position)}}&amp;workTitle=Junior">
+                        <a class="salary-fact" href="/salaries?position={{\App\Services\LinkTransformService::transformPositionName($selected_position)}}">
                             <span class="sf-name">{{$title}}</span>
                             <span class="sf-value">{{$salary_sample}} NIS</span>
                         </a>
@@ -462,11 +466,8 @@
             </div>
         </div>
         <div id="db-employment">
-            <div class="item active">
-                <div class="value">
-                    <span class="value-num">No data</span><span class="value-unit"> NIS</span>
-                </div>
-                <div class="name">Median salary for this job</div>
+            <div class="item active" style="padding-top: 40px">
+                <div class="name">Salary statistics for this job</div>
             </div>
             <div id="db-charts">
                 <div id="db-salary-summary">
@@ -521,7 +522,7 @@
                     </button>
                     <p class="accordion_text">
                         Gender pay disparity exists, with
-                        {{$job_statistics['Gender']['Male'].' NIS of Males and '.$job_statistics['Gender']['Female'].' NIS of Females'}} in roles like <span class="field_text"></span>.
+                        {{(array_key_exists('Male', $job_statistics['Gender'])? $job_statistics['Gender']['Male']: 0).' NIS of Males and '.(array_key_exists('Female', $job_statistics['Gender'])? $job_statistics['Gender']['Female']: 0).' NIS of Females'}} in roles like <span class="field_text"></span>.
                     </p>
                 </div>
                 <div class="accordion_item">
@@ -678,14 +679,18 @@
                 el.addEventListener('change', function(ev) {
                     let new_url = '/salaries/' + document.getElementById("position_select").value;
                     let technology = document.getElementById("technology_select").value;
+                    let location_value = document.getElementById("city_select").value;
                     if (technology !== '' && ev.currentTarget.id !== 'position_select') {
                         new_url += ('/' + technology);
                     }
-                    let position_select = ['position_select', 'technology_select'];
+                    if (location_value !== '' && ev.currentTarget.id !== 'position_select') {
+                        new_url += ('/' + location_value);
+                    }
+                    let url_parts = ['position_select', 'technology_select', 'city_select'];
                     let selects = document.querySelectorAll('.statistics__inputs__input_container select');
                     let added_select_idx = 0;
                     selects.forEach((el, idx) => {
-                        if (!position_select.includes(el.id) && el.value !== '') {
+                        if (!url_parts.includes(el.id) && el.value !== '') {
                             if (added_select_idx === 0) {
                                 new_url += '?';
                             } else {
@@ -875,6 +880,9 @@
                     m_quantile = d3.quantile(data.map((data) => data['Salary (₪)']), .5);
                     th_quantile = d3.quantile(data.map((data) => data['Salary (₪)']), .75);
                     plotSallaryChart(preparedData);
+                }
+                else {
+                    document.querySelector('#db-chart > div').style.height = '50px';
                 }
                 document.querySelector('.q1 .value-num').innerText = f_quantile;
                 document.querySelector('.median .value-num').innerText = m_quantile;
